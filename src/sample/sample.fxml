@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Generations">
+   <children>
+      <AnchorPane prefHeight="474.0" prefWidth="582.0">
+         <children>
+            <Canvas height="350.0" layoutX="14.0" layoutY="111.0" width="554.0" />
+            <Button layoutX="33.0" layoutY="21.0" mnemonicParsing="false" text="homogeneous" />
+            <Button layoutX="180.0" layoutY="21.0" mnemonicParsing="false" text="with radius" />
+            <Button layoutX="319.0" layoutY="21.0" mnemonicParsing="false" text="random" />
+            <Button layoutX="443.0" layoutY="21.0" mnemonicParsing="false" text="click-out" />
+            <CheckBox layoutX="50.0" layoutY="60.0" mnemonicParsing="false" text="periodic" />
+            <Label layoutX="254.0" layoutY="61.0" text="number of cells:" />
+            <TextField layoutX="374.0" layoutY="56.0" prefHeight="26.0" prefWidth="69.0" />
+         </children></AnchorPane>
+   </children>
+   <columnConstraints>
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+   </rowConstraints>
+</GridPane>

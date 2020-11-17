@@ -1,111 +1,308 @@
 package sample;
 
+import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class View extends VBox {
-    private Button buttonNextGeneration;
-    private Button buttonHomogeneous;
-    private Button buttonWithRadius;
-    private Button buttonRandom;
-    private Button buttonClickOut;
-    private CheckBox checkBoxPeriodic;
+    Button buttonNextGeneration;
+    Button buttonHomogeneous;
+    Button buttonWithRadius;
+    Button buttonRandom;
+    Button buttonClickOut;
+    Label label1;
+    Label label2;
+    Label label3;
+    Label label4;
+    Label label5;
+    Label label6;
 
-    private TextField textField;
-    private Canvas canvas;
-    int valueOfCellsInRow = 100;
+    TextField textFieldNumberCells;
+    TextField textFieldNumberInRow;
+    TextField textFieldNumberInColumn;
+    TextField textFieldRandomNumber;
+    TextField textFieldRadius;
+    TextField textFieldRadNumber;
+
+    CheckBox checkBoxPeriodic;
+
+    Canvas canvas;
+    GraphicsContext graphicsContext;
+
+    int size = 100;
+    int aliveCellsInRow, aliveCellsInColumn, aliveRandomCells, radius, aliveRadiusCells;
+    int a = 100, b = 60, c = 150;
 
     private Affine affine;
-    private Generations generations;
-    private Nucleation nucleation;
+    Nucleation nucleation;
     Random random = new Random();
 
     public View() {
-        this.generations = new Generations(valueOfCellsInRow, valueOfCellsInRow);
-        this.textField = new TextField("");
-        textField.setMaxHeight(10);
-        textField.setMaxWidth(100);
-
-        this.textField.setOnAction(actionEvent -> {
-            String text = textField.getText();
-            valueOfCellsInRow = Integer.parseInt(text);
-            for(int i = 0; i < valueOfCellsInRow*valueOfCellsInRow*0.4; i++){
-                generations.makeCellAlive(random.nextInt(valueOfCellsInRow),
-                        random.nextInt(valueOfCellsInRow));
-            }
+        this.canvas = new Canvas(600, 600);
+        graphicsContext = this.canvas.getGraphicsContext2D();
+//-----------------------------------------------------------------------------
+        this.label1 = new Label("Number of cells to create the grid:");
+        this.textFieldNumberCells = new TextField("");
+        textFieldNumberCells.setMaxHeight(10);
+        textFieldNumberCells.setMaxWidth(100);
+        this.textFieldNumberCells.setOnAction(actionEvent -> {
+            resetView();
+            String text = textFieldNumberCells.getText();
+            size = Integer.parseInt(text);
+//            for(int i = 0; i < valueOfCellsInRow*valueOfCellsInRow*0.4; i++){
+//                generations.makeCellAlive(random.nextInt(valueOfCellsInRow),
+//                        random.nextInt(valueOfCellsInRow));
+//            }
             show();
         });
-        this.buttonHomogeneous = new Button("Homogeous");
 
+        this.nucleation = new Nucleation(size, size);
+
+//----------------------------------------------------------------------------
+
+        this.label2 = new Label("Number of alive cells in row:");
+        this.textFieldNumberInRow = new TextField("");
+        textFieldNumberInRow.setMaxHeight(10);
+        textFieldNumberInRow.setMaxWidth(100);
+        this.textFieldNumberInRow.setOnAction(actionEvent -> {
+            String text1 = textFieldNumberInRow.getText();
+            aliveCellsInRow = Integer.parseInt(text1);
+        });
+
+        this.label3 = new Label("Number of alive cells in column:");
+        this.textFieldNumberInColumn = new TextField("");
+        textFieldNumberInColumn.setMaxHeight(10);
+        textFieldNumberInColumn.setMaxWidth(100);
+        this.textFieldNumberInColumn.setOnAction(actionEvent -> {
+            String text2 = textFieldNumberInColumn.getText();
+            aliveCellsInColumn = Integer.parseInt(text2);
+        });
+
+        this.buttonHomogeneous = new Button("Homogeous");
         this.buttonHomogeneous.setOnAction(actionEvent -> {
-            int stage = 0;
-            for(int i = 0; i < valueOfCellsInRow; i += 3){
-                for(int j = 0; j < valueOfCellsInRow; j += 3) {
-                    nucleation.makeCellAliveHomogeneous(i, j, stage);
+            resetView();
+            int iColumn = (size/aliveCellsInColumn);
+            int jRow = (size/aliveCellsInRow);
+
+            if(size % aliveCellsInColumn != 0){
+                iColumn += 1;
+            }
+            if(size % aliveCellsInRow != 0){
+                jRow += 1;
+            }
+
+            int stage = 1;
+            for(int i = 0; i < size; i += jRow){
+                for(int j = 0; j < size; j += iColumn) {
+                    nucleation.makeCellAlive(i, j, stage);
                     stage++;
                     show();
                 }
             }
         });
 
-        this.buttonWithRadius = new Button("With radius");
-        this.buttonRandom = new Button("Random");
-        this.buttonClickOut = new Button("Click-out");
-        this.checkBoxPeriodic = new CheckBox("periodic");
-        this.checkBoxPeriodic.setOnAction(actionEvent -> {
-            nucleation.periodicBC();
+//-------------------------------------------------------------------------
+
+        this.label5 = new Label("Radius:");
+        this.textFieldRadius = new TextField("");
+        textFieldRadius.setMaxHeight(10);
+        textFieldRadius.setMaxWidth(100);
+        this.textFieldRadius.setOnAction(actionEvent -> {
+            String text5 = textFieldRadius.getText();
+            radius = Integer.parseInt(text5);
         });
 
-        this.buttonNextGeneration = new Button("Next generation");
-        this.buttonNextGeneration.setOnAction(actionEvent -> {
-            generations.step();
+        this.label6 = new Label("Number of cells:");
+        this.textFieldRadNumber = new TextField("");
+        textFieldRadNumber.setMaxHeight(10);
+        textFieldRadNumber.setMaxWidth(100);
+        this.textFieldRadNumber.setOnAction(actionEvent -> {
+            String text6 = textFieldRadNumber.getText();
+            aliveRadiusCells = Integer.parseInt(text6);
+        });
+
+        this.buttonWithRadius = new Button("With radius");
+        this.buttonWithRadius.setOnAction(actionEvent -> {
+            resetView();
+            List<Point> listOfPoints = new ArrayList<>();
+            int xRandom = random.nextInt(size);
+            int yRandom = random.nextInt(size);
+            listOfPoints.clear();
+
+            Point p1 = new Point(xRandom, yRandom);
+            listOfPoints.add(p1);
+
+            int stage = 1;
+            nucleation.makeCellAlive(xRandom, yRandom, stage);
+            stage++;
+
+            int aliveCellsInGrid = 1;
+            int tmp;
+
+            while(aliveCellsInGrid < aliveRadiusCells){
+                tmp = 0;
+                xRandom = random.nextInt(size);
+                yRandom = random.nextInt(size);
+
+                for(int j = 0; j < listOfPoints.size(); j++){
+                    int distance = (int)Math.sqrt(
+                            Math.pow((listOfPoints.get(j).getX() - xRandom), 2) +
+                            Math.pow((listOfPoints.get(j).getY() - yRandom), 2));
+                    if(distance <= radius){
+                        tmp++;
+                    }
+                    else if(tmp == 0 && j == listOfPoints.size()-1){
+                        nucleation.makeCellAlive(xRandom, yRandom, stage);
+                        Point nextPoint = new Point(xRandom, yRandom);
+                        listOfPoints.add(nextPoint);
+                        stage++;
+                        aliveCellsInGrid++;
+                    }
+                }
+            }
             show();
         });
 
-        this.canvas = new Canvas(600, 600);
-        this.getChildren().addAll(this.textField,
+//-------------------------------------------------------------------------
+
+        this.label4 = new Label("Number of alive random cells:");
+        this.textFieldRandomNumber = new TextField("");
+        textFieldRandomNumber.setMaxHeight(10);
+        textFieldRandomNumber.setMaxWidth(100);
+        this.textFieldRandomNumber.setOnAction(actionEvent -> {
+            String text4 = textFieldRandomNumber.getText();
+            aliveRandomCells = Integer.parseInt(text4);
+        });
+        this.buttonRandom = new Button("Random");
+        this.buttonRandom.setOnAction(actionEvent -> {
+            resetView();
+            int stage = 1;
+            for(int i = 0; i < aliveRandomCells; i++){
+                nucleation.makeCellAlive(random.nextInt(size),
+                        random.nextInt(size), stage);
+                stage++;
+            }
+            show();
+        });
+
+//--------------------------------------------------------------------------
+        this.buttonClickOut = new Button("Click-out");
+        this.buttonClickOut.setOnAction(actionEvent -> {
+            resetView();
+            show();
+            int stage = 1;
+            canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    graphicsContext.setFill(Color.rgb(a,b,c));
+                    int x = (int) event.getX();
+                    int y = (int) event.getY();
+                    nucleation.makeCellAlive(x* size /600,y* size /600, stage);
+                    graphicsContext.fillRect(x* size /600,y* size /600,1,1);
+                    a = random.nextInt(255);
+                    b = random.nextInt(255);
+                    c = random.nextInt(255);
+                }
+            });
+            show();
+        });
+        this.checkBoxPeriodic = new CheckBox("periodic");
+        this.buttonNextGeneration = new Button("Next generation");
+        this.buttonNextGeneration.setOnAction(actionEvent -> {
+        //    generations.step();
+            show();
+        });
+//------------------------------------------------------------------------------
+
+        this.getChildren().addAll(
+                this.label1,
+                this.textFieldNumberCells,
+                this.label2,
+                this.textFieldNumberInRow,
+                this.label3,
+                this.textFieldNumberInColumn,
                 this.buttonHomogeneous,
+                this.label5,
+                this.textFieldRadius,
+                this.label6,
+                this.textFieldRadNumber,
                 this.buttonWithRadius,
+                this.label4,
+                this.textFieldRandomNumber,
                 this.buttonRandom,
                 this.buttonClickOut,
                 this.checkBoxPeriodic,
-                this.buttonNextGeneration,
+            //    this.buttonNextGeneration,
                 this.canvas);
     }
 
     public void show() {
         this.affine = new Affine();
-        this.affine.appendScale(600/ valueOfCellsInRow, 600/ valueOfCellsInRow);
+        this.affine.appendScale(600/ size, 600/ size);
         getProperties().clear();
-        GraphicsContext graphicsContext = this.canvas.getGraphicsContext2D();
+        graphicsContext = this.canvas.getGraphicsContext2D();
         graphicsContext.setTransform(this.affine);
         graphicsContext.setFill(Color.BEIGE);
         graphicsContext.fillRect(0, 0, 600, 600);
 
-        graphicsContext.setFill(Color.DARKCYAN);
-        for (int x = 0; x < this.generations.width; x++) {
-            for (int y = 0; y < this.generations.height; y++) {
-                if (this.generations.getState(x, y) == 1) {
-                    graphicsContext.fillRect(x, y, 1, 1);
+        for (int x = 0; x < this.nucleation.width; x++) {
+            for (int y = 0; y < this.nucleation.height; y++) {
+
+                if(checkBoxPeriodic.isSelected()){
+                    if (this.nucleation.periodicBC(x, y, size) > 0) {
+                        graphicsContext.setFill(Color.rgb(a, b, c));
+                        graphicsContext.fillRect(x, y, 1, 1);
+                        a = random.nextInt(255);
+                        b = random.nextInt(255);
+                        c = random.nextInt(255);
+                    }
+                }
+                else {
+                    if (this.nucleation.absorbingBC(x, y) > 0) {
+                        graphicsContext.setFill(Color.rgb(a, b, c));
+                        graphicsContext.fillRect(x, y, 1, 1);
+                        a = random.nextInt(255);
+                        b = random.nextInt(255);
+                        c = random.nextInt(255);
+                    }
                 }
             }
         }
 
         graphicsContext.setStroke(Color.GRAY);
         graphicsContext.setLineWidth(0.05);
-        for (int x = 0; x <= this.generations.width; x++) {
-            graphicsContext.strokeLine(x, 0, x, valueOfCellsInRow);
+        for (int x = 0; x <= this.nucleation.width; x++) {
+            graphicsContext.strokeLine(x, 0, x, size);
         }
-        for (int y = 0; y <= this.generations.height; y++) {
-            graphicsContext.strokeLine(0, y, valueOfCellsInRow, y);
+        for (int y = 0; y <= this.nucleation.height; y++) {
+            graphicsContext.strokeLine(0, y, size, y);
+        }
+    }
+    public void resetView() {
+        this.affine = new Affine();
+        this.affine.appendScale(600/ size, 600/ size);
+        getProperties().clear();
+        graphicsContext = this.canvas.getGraphicsContext2D();
+        graphicsContext.setTransform(this.affine);
+        graphicsContext.setFill(Color.BEIGE);
+        graphicsContext.fillRect(0, 0, 600, 600);
+
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++){
+                nucleation.setStage(i,j);
+            }
         }
     }
 }

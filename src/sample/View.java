@@ -41,7 +41,7 @@ public class View extends VBox {
     Canvas canvas;
     GraphicsContext graphicsContext;
 
-    int size = 100;
+    int size = 1000;
     int aliveCellsInRow, aliveCellsInColumn, aliveRandomCells, radius, aliveRadiusCells;
     int a = 100, b = 60, c = 150;
 
@@ -50,7 +50,7 @@ public class View extends VBox {
     Random random = new Random();
 
     public View() {
-        this.canvas = new Canvas(600, 600);
+        this.canvas = new Canvas(1000, 1000);
         graphicsContext = this.canvas.getGraphicsContext2D();
 //-----------------------------------------------------------------------------
         this.label1 = new Label("Number of cells to create the grid:");
@@ -209,8 +209,8 @@ public class View extends VBox {
                     graphicsContext.setFill(Color.rgb(a,b,c));
                     int x = (int) event.getX();
                     int y = (int) event.getY();
-                    nucleation.makeCellAlive(x* size /600,y* size /600, stage);
-                    graphicsContext.fillRect(x* size /600,y* size /600,1,1);
+                    nucleation.makeCellAlive(x* size /1000,y* size /1000, stage);
+                    graphicsContext.fillRect(x* size /1000,y* size /1000,1,1);
                     a = random.nextInt(255);
                     b = random.nextInt(255);
                     c = random.nextInt(255);
@@ -250,12 +250,12 @@ public class View extends VBox {
 
     public void show() {
         this.affine = new Affine();
-        this.affine.appendScale(600/ size, 600/ size);
+        this.affine.appendScale(1000/ size, 600/ size);
         getProperties().clear();
         graphicsContext = this.canvas.getGraphicsContext2D();
         graphicsContext.setTransform(this.affine);
         graphicsContext.setFill(Color.BEIGE);
-        graphicsContext.fillRect(0, 0, 600, 600);
+        graphicsContext.fillRect(0, 0, 1000, 1000);
 
         for (int x = 0; x < this.nucleation.width; x++) {
             for (int y = 0; y < this.nucleation.height; y++) {
@@ -297,7 +297,7 @@ public class View extends VBox {
         graphicsContext = this.canvas.getGraphicsContext2D();
         graphicsContext.setTransform(this.affine);
         graphicsContext.setFill(Color.BEIGE);
-        graphicsContext.fillRect(0, 0, 600, 600);
+        graphicsContext.fillRect(0, 0, 1000, 1000);
 
         for(int i = 0; i < size; i++){
             for(int j = 0; j < size; j++){

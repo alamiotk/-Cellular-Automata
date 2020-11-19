@@ -11,7 +11,7 @@ public class CA extends Application {
     @Override
     public void start(Stage stage){
         View view = new View();
-        Scene scene = new Scene(view, 610, 1000);
+        Scene scene = new Scene(view, 1000, 1500);
         stage.setScene(scene);
         stage.show();
         view.resetView();

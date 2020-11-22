@@ -11,10 +11,10 @@ public class CA extends Application {
     @Override
     public void start(Stage stage){
         View view = new View();
-        Scene scene = new Scene(view, 1000, 1500);
+        Scene scene = new Scene(view, 1500, 980);
         stage.setScene(scene);
         stage.show();
-        view.resetView();
+        //view.resetView();
     }
 
     public static void main(String[] args) {

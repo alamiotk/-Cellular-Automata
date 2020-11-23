@@ -68,7 +68,8 @@ public class Nucleation {
         return this.grid[x][y];
     }
 
-    public void homogeousNucleation(int size, int aliveCellsInColumn, int aliveCellsInRow) {
+    public void homogeousNucleation(int size, int aliveCellsInColumn,
+                                    int aliveCellsInRow) {
         int iColumn = (size/aliveCellsInColumn);
         int jRow = (size/aliveCellsInRow);
 
@@ -88,7 +89,8 @@ public class Nucleation {
         }
     }
 
-    public void radiusNucleation(int size, int aliveRadiusCells, int radius, Random random){
+    public void radiusNucleation(int size, int aliveRadiusCells,
+                                 int radius, Random random){
         List<Point> listOfPoints = new ArrayList<>();
         int xRandom = random.nextInt(size);
         int yRandom = random.nextInt(size);

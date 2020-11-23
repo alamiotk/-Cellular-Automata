@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
@@ -8,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -46,12 +48,15 @@ public class View extends GridPane {
 
     int size = 1000;
     int aliveCellsInRow, aliveCellsInColumn, aliveRandomCells, radius, aliveRadiusCells;
-    int a = 100, b = 60, c = 150;
+    final int[] a = {100};
+    final int[] b = { 60 };
+    final int[] c = { 150 };
 
     private Affine affine;
     Nucleation nucleation;
     Nucleation newNucleationGrid;
     Random random = new Random();
+    Neighbourhood neighbourhood = new Neighbourhood();
 
 
     public View() {
@@ -113,7 +118,8 @@ public class View extends GridPane {
         this.buttonHomogeneous = new Button("Homogeous");
         this.buttonHomogeneous.setOnAction(actionEvent -> {
             resetView();
-            nucleation.homogeousNucleation(size, aliveCellsInColumn, aliveCellsInRow);
+            nucleation.homogeousNucleation(size, aliveCellsInColumn,
+                    aliveCellsInRow);
             show();
         });
 
@@ -143,7 +149,8 @@ public class View extends GridPane {
         this.buttonWithRadius = new Button("With radius");
         this.buttonWithRadius.setOnAction(actionEvent -> {
             resetView();
-            nucleation.radiusNucleation(size, aliveRadiusCells, radius, random);
+            nucleation.radiusNucleation(size, aliveRadiusCells,
+                    radius, random);
             show();
         });
 
@@ -160,11 +167,16 @@ public class View extends GridPane {
             aliveRandomCells = Integer.parseInt(text4);
         });
 
+
         this.buttonRandom = new Button("Random");
         this.buttonRandom.setOnAction(actionEvent -> {
             resetView();
-            nucleation.randomNucleation(size, aliveRandomCells,random);
-            show();
+
+                    nucleation.randomNucleation(size, aliveRandomCells,random);
+                    show();
+
+
+
         });
 
 //--------------------------------------------------------------------------
@@ -173,43 +185,76 @@ public class View extends GridPane {
             resetView();
             show();
             int stage = 1;
-            nucleation.clickNucleation(canvas, graphicsContext, size, stage, random);
-            show();
+            nucleation.clickNucleation(canvas, graphicsContext,
+                    size, stage, random);
         });
 
 //--------------------------------------------------------------------------------
 
         this.checkBoxPeriodic = new CheckBox("periodic");
-        this.buttonNextGeneration = new Button("Next generation");
-        this.buttonNextGeneration.setOnAction(actionEvent -> {
-            //    generations.step();
-            show();
-        });
+
 
 //---------------------------------------------------------------------------------
+    Generations generations = new Generations();
+
 
         this.buttonNeumann = new Button("Von Neumann");
         this.buttonNeumann.setOnAction(actionEvent -> {
-            resetView();
-            show();
+            neighbourhood.neumannNeighbour(nucleation, newNucleationGrid,
+                    graphicsContext, size);
+
         });
 
         this.buttonMoore = new Button("Moore");
         this.buttonMoore.setOnAction(actionEvent -> {
-            resetView();
-            show();
+            neighbourhood.mooreNeighbour(nucleation, newNucleationGrid,
+                    graphicsContext, size);
         });
 
         this.buttonPer= new Button("Pentagonal");
         this.buttonPer.setOnAction(actionEvent -> {
-            resetView();
-            show();
+            int pent = random.nextInt(4);
+            switch(pent){
+                case 1:
+                    neighbourhood.pentLeftNeigbour(nucleation, newNucleationGrid,
+                            graphicsContext, size);
+                    break;
+                case 2:
+                    neighbourhood.pentRightNeigbour(nucleation, newNucleationGrid,
+                            graphicsContext, size);
+                    break;
+
+                case 3:
+                    neighbourhood.pentBottomNeigbour(nucleation, newNucleationGrid,
+                            graphicsContext, size);
+                    break;
+
+                case 4:
+                    neighbourhood.pentTopNeigbour(nucleation, newNucleationGrid,
+                            graphicsContext, size);
+                    break;
+
+                default:
+                    break;
+            }
         });
 
         this.buttonHex = new Button("Hexagonal");
         this.buttonHex.setOnAction(actionEvent -> {
-            resetView();
-            show();
+            int pent = random.nextInt(2);
+            switch(pent) {
+                case 1:
+                    neighbourhood.hexLeftNeigbour(nucleation, newNucleationGrid,
+                            graphicsContext, size);
+                    break;
+                case 2:
+                    neighbourhood.hexRightNeigbour(nucleation, newNucleationGrid,
+                            graphicsContext, size);
+                    break;
+                default:
+                    break;
+
+            }
         });
 
         this.label7 = new Label("");
@@ -268,20 +313,20 @@ public class View extends GridPane {
 
                 if(checkBoxPeriodic.isSelected()){
                     if (this.nucleation.getStatePeriodicBC(x, y, size) > 0) {
-                        graphicsContext.setFill(Color.rgb(a, b, c));
+                        graphicsContext.setFill(Color.rgb(a[0], b[0], c[0]));
                         graphicsContext.fillRect(x, y, 1, 1);
-                        a = random.nextInt(255);
-                        b = random.nextInt(255);
-                        c = random.nextInt(255);
+                        a[0] = random.nextInt(255);
+                        b[0] = random.nextInt(255);
+                        c[0] = random.nextInt(255);
                     }
                 }
                 else {
                     if (this.nucleation.getStateAbsorbingBC(x, y) > 0) {
-                        graphicsContext.setFill(Color.rgb(a, b, c));
+                        graphicsContext.setFill(Color.rgb(a[0], b[0], c[0]));
                         graphicsContext.fillRect(x, y, 1, 1);
-                        a = random.nextInt(255);
-                        b = random.nextInt(255);
-                        c = random.nextInt(255);
+                        a[0] = random.nextInt(255);
+                        b[0] = random.nextInt(255);
+                        c[0] = random.nextInt(255);
                     }
                 }
             }

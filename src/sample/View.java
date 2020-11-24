@@ -1,23 +1,19 @@
 package sample;
 
-import javafx.event.EventHandler;
+import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 
+
 import java.util.Random;
 
 public class View extends GridPane {
-    Button buttonNextGeneration;
     Button buttonHomogeneous;
     Button buttonWithRadius;
     Button buttonRandom;
@@ -26,6 +22,7 @@ public class View extends GridPane {
     Button buttonMoore;
     Button buttonPer;
     Button buttonHex;
+    Button animationStop;
     Label label1;
     Label label2;
     Label label3;
@@ -33,6 +30,7 @@ public class View extends GridPane {
     Label label5;
     Label label6;
     Label label7;
+
 
     TextField textFieldNumberCells;
     TextField textFieldNumberInRow;
@@ -76,16 +74,18 @@ public class View extends GridPane {
             resetView();
             String text = textFieldNumberCells.getText();
             size = Integer.parseInt(text);
+            if(size > 1000){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("1000 is the biggest possible numbers of cells!");
+                alert.showAndWait();
+            }
             show();
         });
 
         this.nucleation = new Nucleation(size, size);
         this.newNucleationGrid = new Nucleation(size, size);
-        for(int i = 0; i < size; i++){
-            for(int j = 0; j < size; j++){
-                newNucleationGrid.setStage(i,j);
-            }
-        }
+
 //---------------------------------------------------------------------
 
         this.label2 = new Label("Number of alive cells in row:");
@@ -97,6 +97,12 @@ public class View extends GridPane {
         this.textFieldNumberInRow.setOnAction(actionEvent -> {
             String text1 = textFieldNumberInRow.getText();
             aliveCellsInRow = Integer.parseInt(text1);
+            if(aliveCellsInRow > size){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Too big number!");
+                alert.showAndWait();
+            }
         });
 
 
@@ -109,6 +115,12 @@ public class View extends GridPane {
         this.textFieldNumberInColumn.setOnAction(actionEvent -> {
             String text2 = textFieldNumberInColumn.getText();
             aliveCellsInColumn = Integer.parseInt(text2);
+            if(aliveCellsInColumn > size){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Too big number!");
+                alert.showAndWait();
+            }
         });
 
         this.buttonHomogeneous = new Button("Homogeous");
@@ -145,9 +157,11 @@ public class View extends GridPane {
         this.buttonWithRadius = new Button("With radius");
         this.buttonWithRadius.setOnAction(actionEvent -> {
             resetView();
-            nucleation.radiusNucleation(size, aliveRadiusCells,
+            int res = nucleation.radiusNucleation(size, aliveRadiusCells,
                     radius, random);
-            show();
+            if(res == 1) {
+                show();
+            }
         });
 
 //-------------------------------------------------------------------------
@@ -167,8 +181,16 @@ public class View extends GridPane {
         this.buttonRandom = new Button("Random");
         this.buttonRandom.setOnAction(actionEvent -> {
             resetView();
-            nucleation.randomNucleation(size, aliveRandomCells,random);
-            show();
+            if(aliveRandomCells > size * size){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Too big number!");
+                alert.showAndWait();
+            }
+            else {
+                nucleation.randomNucleation(size, aliveRandomCells, random);
+                show();
+            }
         });
 
 //--------------------------------------------------------------------------
@@ -180,54 +202,61 @@ public class View extends GridPane {
             nucleation.clickNucleation(canvas, graphicsContext,
                     size, stage, random);
         });
-
 //--------------------------------------------------------------------------------
 
         this.checkBoxPeriodic = new CheckBox("periodic");
-
-
 //---------------------------------------------------------------------------------
 
 
+
+        AnimationTimer animationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                 simulationOneStep(neighbourhood.neumannCells);
+
+                 try{
+                     Thread.sleep(5);
+                 }
+                 catch(InterruptedException interruptedException){
+                     interruptedException.printStackTrace();
+                 }
+
+                animationStop.setOnAction(actionEvent -> {
+                    stop();
+                });
+
+                
+            }
+        };
+
         this.buttonNeumann = new Button("Von Neumann");
         this.buttonNeumann.setOnAction(actionEvent -> {
-            neighbourhood.generationDevelopment(size, neighbourhood.neumannCells,
-                    nucleation, newNucleationGrid, graphicsContext);
-            newNucleationReset(nucleation, newNucleationGrid);
+            animationTimer.start();
+            //simulationOneStep(neighbourhood.neumannCells);
         });
 
         this.buttonMoore = new Button("Moore");
         this.buttonMoore.setOnAction(actionEvent -> {
-            neighbourhood.generationDevelopment(size, neighbourhood.mooreCells,
-                    nucleation, newNucleationGrid, graphicsContext);
-            newNucleationReset(nucleation, newNucleationGrid);
+            simulationOneStep(neighbourhood.mooreCells);
         });
 
-        this.buttonPer= new Button("Pentagonal");
+        this.buttonPer = new Button("Pentagonal");
         this.buttonPer.setOnAction(actionEvent -> {
             int pent = random.nextInt(4);
             switch(pent){
                 case 1:
-                    neighbourhood.generationDevelopment(size, neighbourhood.pentLeftCells,
-                            nucleation, newNucleationGrid, graphicsContext);
-                    newNucleationReset(nucleation, newNucleationGrid);
+                    simulationOneStep(neighbourhood.pentLeftCells);
                     break;
                 case 2:
-                    neighbourhood.generationDevelopment(size, neighbourhood.pentRightCells,
-                            nucleation, newNucleationGrid, graphicsContext);
-                    newNucleationReset(nucleation, newNucleationGrid);
+                    simulationOneStep(neighbourhood.pentRightCells);
                     break;
 
                 case 3:
-                    neighbourhood.generationDevelopment(size, neighbourhood.pentBottomCells,
-                            nucleation, newNucleationGrid, graphicsContext);
-                    newNucleationReset(nucleation, newNucleationGrid);
+                    simulationOneStep(neighbourhood.pentBottomCells);
                     break;
 
                 case 4:
-                    neighbourhood.generationDevelopment(size, neighbourhood.pentTopCells,
-                            nucleation, newNucleationGrid, graphicsContext);
-                    newNucleationReset(nucleation, newNucleationGrid);
+                    simulationOneStep(neighbourhood.pentTopCells);
                     break;
 
                 default:
@@ -240,14 +269,10 @@ public class View extends GridPane {
             int pent = random.nextInt(2);
             switch(pent) {
                 case 1:
-                    neighbourhood.generationDevelopment(size, neighbourhood.hexLeftCells,
-                            nucleation, newNucleationGrid, graphicsContext);
-                    newNucleationReset(nucleation, newNucleationGrid);
+                    simulationOneStep(neighbourhood.hexLeftCells);
                     break;
                 case 2:
-                    neighbourhood.generationDevelopment(size, neighbourhood.hexRightCells,
-                            nucleation, newNucleationGrid, graphicsContext);
-                    newNucleationReset(nucleation, newNucleationGrid);
+                    simulationOneStep(neighbourhood.hexRightCells);
                     break;
                 default:
                     break;
@@ -257,10 +282,12 @@ public class View extends GridPane {
 
         this.label7 = new Label("");
 
-
+        this.animationStop = new Button("Animation stop");
+      
+      
 
 //------------------------------------------------------------------------------
-        this.add(canvas, 1, 2, 1, 15);
+        this.add(canvas, 1, 2, 1, 16);
         this.add(label1, 3, 1,3,1);
         this.add(textFieldNumberCells, 4, 2, 1, 1);
 
@@ -292,13 +319,40 @@ public class View extends GridPane {
         this.add(buttonPer, 3, 15, 1, 1);
         this.add(buttonHex, 5, 15, 1, 1);
 
+        this.add(animationStop, 4, 16, 1, 1);
+    }
+
+    public int isCheckBoxPeriodicSelected(CheckBox checkBoxPeriodic) {
+        if(checkBoxPeriodic.isSelected()){
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    public void simulationOneStep(int[][] cells){
+         resetNewGrid(newNucleationGrid);
+         neighbourhood.generationDevelopment(size, cells,
+                 nucleation, newNucleationGrid, graphicsContext,
+                 isCheckBoxPeriodicSelected(checkBoxPeriodic));
+         newNucleationReset(nucleation, newNucleationGrid);
     }
 
     public void newNucleationReset(Nucleation nucleation,
                                    Nucleation newNucleationGrid) {
         for(int i = 0; i < size; i++){
             for(int j = 0; j < size; j++) {
-                nucleation.grid[i][j] = newNucleationGrid.grid[i][j];
+                if(nucleation.grid[i][j] == 0) {
+                    nucleation.grid[i][j] = newNucleationGrid.grid[i][j];
+                }
+            }
+        }
+    }
+
+    public void resetNewGrid(Nucleation newNucleationGrid) {
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++){
+                newNucleationGrid.setStage(i,j);
             }
         }
     }
@@ -312,26 +366,24 @@ public class View extends GridPane {
         graphicsContext.setFill(Color.WHITE);
         graphicsContext.fillRect(0, 0, 900, 900);
 
+        int state = -1;
+
         for (int x = 0; x < this.nucleation.width; x++) {
             for (int y = 0; y < this.nucleation.height; y++) {
 
-                if(checkBoxPeriodic.isSelected()){
-                    if (this.nucleation.getStatePeriodicBC(x, y, size) > 0) {
-                        graphicsContext.setFill(Color.rgb(a[0], b[0], c[0]));
-                        graphicsContext.fillRect(x, y, 1, 1);
-                        a[0] = random.nextInt(255);
-                        b[0] = random.nextInt(255);
-                        c[0] = random.nextInt(255);
-                    }
+
+                if(checkBoxPeriodic.isSelected()) {
+                    state = nucleation.getStatePeriodicBC(x, y, size);
+                } else {
+                    state = nucleation.getStateAbsorbingBC(x, y);
                 }
-                else {
-                    if (this.nucleation.getStateAbsorbingBC(x, y) > 0) {
-                        graphicsContext.setFill(Color.rgb(a[0], b[0], c[0]));
-                        graphicsContext.fillRect(x, y, 1, 1);
-                        a[0] = random.nextInt(255);
-                        b[0] = random.nextInt(255);
-                        c[0] = random.nextInt(255);
-                    }
+
+                if(state > 0) {
+                    graphicsContext.setFill(Color.rgb(a[0], b[0], c[0]));
+                    graphicsContext.fillRect(x, y, 1, 1);
+                    a[0] = random.nextInt(255);
+                    b[0] = random.nextInt(255);
+                    c[0] = random.nextInt(255);
                 }
             }
         }

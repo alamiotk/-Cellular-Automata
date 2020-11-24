@@ -3,6 +3,7 @@ package sample;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
@@ -45,25 +46,25 @@ public class Nucleation {
         if (x < 0 && y < 0) {
             return this.grid[valueOfCells - 1][valueOfCells - 1];
         }
-        if (x > width && y < 0) {
+        if (x >= width && y < 0) {
             return this.grid[0][valueOfCells - 1];
         }
-        if (x > width && y > height) {
+        if (x >= width && y >= height) {
             return this.grid[0][0];
         }
-        if (x < 0 && y > height) {
+        if (x < 0 && y >= height) {
             return this.grid[valueOfCells - 1][0];
         }
-        if (x == width && (y >= 0 && y < height)) {
+        if (x >= width && (y >= 0 && y <=height-1)) {
             return this.grid[0][y];
         }
-        if (x < 0 && (y >= 0 && y < height)) {
+        if (x < 0 && (y >= 0 && y <= height-1)) {
             return this.grid[valueOfCells - 1][y];
         }
-        if (y == height && (x >= 0 && x < width)) {
+        if (y >= height && (x >= 0 && x <= width-1)) {
             return this.grid[x][0];
         }
-        if (y < 0  && (x >= 0 && x < width)) {
+        if (y < 0  && (x >= 0 && x <= width-1)) {
             return this.grid[x][valueOfCells - 1];
         }
         return this.grid[x][y];
@@ -92,7 +93,7 @@ public class Nucleation {
 
 
 
-    public void radiusNucleation(int size, int aliveRadiusCells,
+    public int radiusNucleation(int size, int aliveRadiusCells,
                                  int radius, Random random){
         List<Point> listOfPoints = new ArrayList<>();
         int xRandom = random.nextInt(size);
@@ -108,9 +109,18 @@ public class Nucleation {
 
         int aliveCellsInGrid = 1;
         int tmp;
+        int counter = 0;
 
         while(aliveCellsInGrid < aliveRadiusCells){
             tmp = 0;
+            counter++;
+            if(counter == size){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Too big radius or number of cells!");
+                alert.showAndWait();
+                return 0;
+            }
             xRandom = random.nextInt(size);
             yRandom = random.nextInt(size);
 
@@ -130,6 +140,7 @@ public class Nucleation {
                 }
             }
         }
+        return 1;
     }
 
     public void randomNucleation(int size, int aliveRandomCells, Random random) {

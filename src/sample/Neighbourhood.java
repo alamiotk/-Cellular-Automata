@@ -2,6 +2,7 @@ package sample;
 
 import com.sun.prism.Graphics;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.CheckBox;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -77,11 +78,11 @@ public class Neighbourhood {
     public void generationDevelopment(int size, int[][] neighbourCells,
                                       Nucleation nucleation,
                                       Nucleation newNucleation,
-                                      GraphicsContext graphicsContext) {
+                                      GraphicsContext graphicsContext, int checkBoxSelected) {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 checkAndFillCells(x, y, size, neighbourCells,
-                  nucleation,newNucleation, graphicsContext);
+                  nucleation,newNucleation, graphicsContext, checkBoxSelected);
             }
         }
     }
@@ -89,20 +90,26 @@ public class Neighbourhood {
     public void checkAndFillCells(int x, int y, int size, int[][] neighbourCells,
                                   Nucleation nucleation,
                                   Nucleation newNucleation,
-                                  GraphicsContext graphicsContext) {
+                                  GraphicsContext graphicsContext,
+                                  int checkBoxSelected) {
         HashMap<Point, Integer> checkingMaxNeigbours = new HashMap<>();
         int j = 0;
-        int state;
+        int state = -1;
 
         WritableImage snap = graphicsContext.getCanvas()
                 .snapshot(null, null);
-        if(nucleation.getStateAbsorbingBC(x,y) == 0) {
+        if(nucleation.getStateAbsorbingBC(x,y) == 0 || nucleation.getStatePeriodicBC(x, y, size) == 0) {
 
             for (int i = 0; i < neighbourCells.length; i++) {
                 int iTemp = x + neighbourCells[i][j];
                 int jTemp = y + neighbourCells[i][j + 1];
 
-                state = nucleation.getStateAbsorbingBC(iTemp, jTemp);
+                if(checkBoxSelected == 1){
+                    state = nucleation.getStatePeriodicBC(iTemp, jTemp, size);
+
+                } else if(checkBoxSelected == 0){
+                    state = nucleation.getStateAbsorbingBC(iTemp, jTemp);
+                }
                 Point point = new Point(iTemp, jTemp);
                 checkingMaxNeigbours.put(point, state);
             }
@@ -111,8 +118,8 @@ public class Neighbourhood {
             if (checkingMaxNeigbours.get(maxPoint) != 0) {
                 newNucleation.makeCellAlive(x, y, checkingMaxNeigbours.get(maxPoint));
 
-                int xpos = (int) ((maxPoint.getX() * 900 / size) + (0.1 * (900 / size)));
-                int ypos = (int) ((maxPoint.getY() * 900 / size) + (0.1 * (900 / size)));
+                int xpos = (int) ((maxPoint.getX() * 900 / size) + (0.5 * (900 / size)));
+                int ypos = (int) ((maxPoint.getY() * 900 / size) + (0.5 * (900 / size)));
 
                 int color = snap.getPixelReader().getArgb(xpos, ypos);
 
@@ -129,10 +136,8 @@ public class Neighbourhood {
     public Point findTheMaxNeighbour(HashMap<Point, Integer> checkingMaxNeigbours) {
         Map.Entry<Point, Integer> maxEntry = null;
 
-        for (Map.Entry<Point, Integer> entry : checkingMaxNeigbours.entrySet())
-        {
-            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
-            {
+        for (Map.Entry<Point, Integer> entry : checkingMaxNeigbours.entrySet()) {
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
                 maxEntry = entry;
             }
         }

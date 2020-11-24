@@ -76,10 +76,6 @@ public class View extends GridPane {
             resetView();
             String text = textFieldNumberCells.getText();
             size = Integer.parseInt(text);
-//            for(int i = 0; i < valueOfCellsInRow*valueOfCellsInRow*0.4; i++){
-//                generations.makeCellAlive(random.nextInt(valueOfCellsInRow),
-//                        random.nextInt(valueOfCellsInRow));
-//            }
             show();
         });
 
@@ -171,12 +167,8 @@ public class View extends GridPane {
         this.buttonRandom = new Button("Random");
         this.buttonRandom.setOnAction(actionEvent -> {
             resetView();
-
-                    nucleation.randomNucleation(size, aliveRandomCells,random);
-                    show();
-
-
-
+            nucleation.randomNucleation(size, aliveRandomCells,random);
+            show();
         });
 
 //--------------------------------------------------------------------------
@@ -195,20 +187,20 @@ public class View extends GridPane {
 
 
 //---------------------------------------------------------------------------------
-    Generations generations = new Generations();
 
 
         this.buttonNeumann = new Button("Von Neumann");
         this.buttonNeumann.setOnAction(actionEvent -> {
-            neighbourhood.neumannNeighbour(nucleation, newNucleationGrid,
-                    graphicsContext, size);
-
+            neighbourhood.generationDevelopment(size, neighbourhood.neumannCells,
+                    nucleation, newNucleationGrid, graphicsContext);
+            newNucleationReset(nucleation, newNucleationGrid);
         });
 
         this.buttonMoore = new Button("Moore");
         this.buttonMoore.setOnAction(actionEvent -> {
-            neighbourhood.mooreNeighbour(nucleation, newNucleationGrid,
-                    graphicsContext, size);
+            neighbourhood.generationDevelopment(size, neighbourhood.mooreCells,
+                    nucleation, newNucleationGrid, graphicsContext);
+            newNucleationReset(nucleation, newNucleationGrid);
         });
 
         this.buttonPer= new Button("Pentagonal");
@@ -216,22 +208,26 @@ public class View extends GridPane {
             int pent = random.nextInt(4);
             switch(pent){
                 case 1:
-                    neighbourhood.pentLeftNeigbour(nucleation, newNucleationGrid,
-                            graphicsContext, size);
+                    neighbourhood.generationDevelopment(size, neighbourhood.pentLeftCells,
+                            nucleation, newNucleationGrid, graphicsContext);
+                    newNucleationReset(nucleation, newNucleationGrid);
                     break;
                 case 2:
-                    neighbourhood.pentRightNeigbour(nucleation, newNucleationGrid,
-                            graphicsContext, size);
+                    neighbourhood.generationDevelopment(size, neighbourhood.pentRightCells,
+                            nucleation, newNucleationGrid, graphicsContext);
+                    newNucleationReset(nucleation, newNucleationGrid);
                     break;
 
                 case 3:
-                    neighbourhood.pentBottomNeigbour(nucleation, newNucleationGrid,
-                            graphicsContext, size);
+                    neighbourhood.generationDevelopment(size, neighbourhood.pentBottomCells,
+                            nucleation, newNucleationGrid, graphicsContext);
+                    newNucleationReset(nucleation, newNucleationGrid);
                     break;
 
                 case 4:
-                    neighbourhood.pentTopNeigbour(nucleation, newNucleationGrid,
-                            graphicsContext, size);
+                    neighbourhood.generationDevelopment(size, neighbourhood.pentTopCells,
+                            nucleation, newNucleationGrid, graphicsContext);
+                    newNucleationReset(nucleation, newNucleationGrid);
                     break;
 
                 default:
@@ -244,12 +240,14 @@ public class View extends GridPane {
             int pent = random.nextInt(2);
             switch(pent) {
                 case 1:
-                    neighbourhood.hexLeftNeigbour(nucleation, newNucleationGrid,
-                            graphicsContext, size);
+                    neighbourhood.generationDevelopment(size, neighbourhood.hexLeftCells,
+                            nucleation, newNucleationGrid, graphicsContext);
+                    newNucleationReset(nucleation, newNucleationGrid);
                     break;
                 case 2:
-                    neighbourhood.hexRightNeigbour(nucleation, newNucleationGrid,
-                            graphicsContext, size);
+                    neighbourhood.generationDevelopment(size, neighbourhood.hexRightCells,
+                            nucleation, newNucleationGrid, graphicsContext);
+                    newNucleationReset(nucleation, newNucleationGrid);
                     break;
                 default:
                     break;
@@ -289,8 +287,6 @@ public class View extends GridPane {
 
         this.add(buttonClickOut, 5, 13, 1, 1);
 
-        //this.add(label7, 3, 12, 3, 1);
-
         this.add(buttonNeumann, 3, 14, 1, 1);
         this.add(buttonMoore, 5, 14, 1, 1);
         this.add(buttonPer, 3, 15, 1, 1);
@@ -298,6 +294,14 @@ public class View extends GridPane {
 
     }
 
+    public void newNucleationReset(Nucleation nucleation,
+                                   Nucleation newNucleationGrid) {
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++) {
+                nucleation.grid[i][j] = newNucleationGrid.grid[i][j];
+            }
+        }
+    }
 
     public void show() {
         this.affine = new Affine();

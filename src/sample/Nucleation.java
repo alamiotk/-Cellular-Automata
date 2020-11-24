@@ -8,6 +8,7 @@ import javafx.scene.paint.Color;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.spi.CalendarNameProvider;
@@ -88,6 +89,8 @@ public class Nucleation {
             }
         }
     }
+
+
 
     public void radiusNucleation(int size, int aliveRadiusCells,
                                  int radius, Random random){

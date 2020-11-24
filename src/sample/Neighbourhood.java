@@ -6,114 +6,73 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 public class Neighbourhood {
+    int[][] neumannCells;
+    int[][] mooreCells;
+    int[][] pentLeftCells;
+    int[][] pentRightCells;
+    int[][] pentBottomCells;
+    int[][] pentTopCells;
+    int[][] hexLeftCells;
+    int[][] hexRightCells;
+
+
+
+
     public Neighbourhood() {
+        this.neumannCells = new int[][] {{-1, 0},
+                                        {0, -1},
+                                        {1, 0},
+                                        {0, 1}};
+
+
+        this.mooreCells = new int[][] {{-1, 1},
+                                        {-1, 0},
+                                        {-1, -1},
+                                        {0, -1},
+                                        {1, -1},
+                                        {1, 0},
+                                        {1, 1},
+                                        {0, 1}};
+
+        this.pentLeftCells = new int[][] {{0, 1},
+                                        {-1, 1},
+                                        {-1, 0},
+                                        {-1, -1},
+                                        {0, -1}};
+
+        this.pentBottomCells = new int[][] {{1, 0},
+                                        {1, 1},
+                                        {0, 1},
+                                        {-1, 1},
+                                        {-1, 0}};
+
+        this.pentTopCells = new int[][] {{-1, 0},
+                                        {-1, -1},
+                                        {0, -1},
+                                        {1, -1},
+                                        {1, 0}};
+
+        this.hexLeftCells = new int[][] {{0, 1},
+                                        {-1, 1},
+                                        {-1, 0},
+                                        {0, -1},
+                                        {1, -1},
+                                        {1, 0}};
+
+        this.hexRightCells = new int[][] {{-1, 0},
+                                        {-1, -1},
+                                        {0, -1},
+                                        {1, 0},
+                                        {1, 1},
+                                        {0, 1}};
     }
-
-    public void neumannNeighbour(Nucleation nucleation,
-                                 Nucleation newNucleation,
-                                 GraphicsContext graphicsContext, int size){
-
-        int[][] neumannCells = {{-1, 0},
-                                {0, -1},
-                                {1, 0},
-                                {0, 1}};
-
-        generationDevelopment(size, neumannCells, nucleation, newNucleation,
-                graphicsContext);
-    }
-
-    public void  mooreNeighbour(Nucleation nucleation,
-                                Nucleation newNucleation,
-                                GraphicsContext graphicsContext, int size) {
-        int[][] mooreCells = {{-1, 1},
-                            {-1, 0},
-                            {-1, -1},
-                            {0, -1},
-                            {1, -1},
-                            {1, 0},
-                            {1, 1},
-                            {0, 1}};
-        generationDevelopment(size, mooreCells, nucleation, newNucleation,
-                graphicsContext);
-    }
-
-    public void  pentLeftNeigbour(Nucleation nucleation,
-                                Nucleation newNucleation,
-                                GraphicsContext graphicsContext, int size) {
-        int[][] pentLeftCells = {{0, 1},
-                            {-1, 1},
-                            {-1, 0},
-                            {-1, -1},
-                            {0, -1}};
-        generationDevelopment(size, pentLeftCells, nucleation, newNucleation,
-                graphicsContext);
-    }
-
-    public void  pentRightNeigbour(Nucleation nucleation,
-                                  Nucleation newNucleation,
-                                  GraphicsContext graphicsContext, int size) {
-        int[][] pentRightCells = {{0, -1},
-                                {1, -1},
-                                {1, 0},
-                                {1, 1},
-                                {0, 1}};
-        generationDevelopment(size, pentRightCells, nucleation, newNucleation,
-                graphicsContext);
-    }
-
-    public void  pentBottomNeigbour(Nucleation nucleation,
-                                   Nucleation newNucleation,
-                                   GraphicsContext graphicsContext, int size) {
-        int[][] pentBottomCells = {{1, 0},
-                                {1, 1},
-                                {0, 1},
-                                {-1, 1},
-                                {-1, 0}};
-        generationDevelopment(size, pentBottomCells, nucleation, newNucleation,
-                graphicsContext);
-    }
-
-    public void  pentTopNeigbour(Nucleation nucleation,
-                                    Nucleation newNucleation,
-                                    GraphicsContext graphicsContext, int size) {
-        int[][] pentTopCells = {{-1, 0},
-                            {-1, -1},
-                            {0, -1},
-                            {1, -1},
-                            {1, 0}};
-        generationDevelopment(size, pentTopCells, nucleation, newNucleation,
-                graphicsContext);
-    }
-
-    public void  hexLeftNeigbour(Nucleation nucleation,
-                                 Nucleation newNucleation,
-                                 GraphicsContext graphicsContext, int size) {
-        int[][] hexLeftCells = {{0, 1},
-                            {-1, 1},
-                            {-1, 0},
-                            {0, -1},
-                            {1, -1},
-                            {1, 0}};
-        generationDevelopment(size, hexLeftCells, nucleation, newNucleation,
-                graphicsContext);
-    }
-
-    public void  hexRightNeigbour(Nucleation nucleation,
-                                 Nucleation newNucleation,
-                                 GraphicsContext graphicsContext, int size) {
-        int[][] hexRightCells = {{-1, 0},
-                                {-1, -1},
-                                {0, -1},
-                                {1, 0},
-                                {1, 1},
-                                {0, 1}};
-        generationDevelopment(size, hexRightCells, nucleation, newNucleation,
-                graphicsContext);
-    }
-
-
-
 
     public void generationDevelopment(int size, int[][] neighbourCells,
                                       Nucleation nucleation,
@@ -127,31 +86,36 @@ public class Neighbourhood {
         }
     }
 
-
-
     public void checkAndFillCells(int x, int y, int size, int[][] neighbourCells,
                                   Nucleation nucleation,
                                   Nucleation newNucleation,
                                   GraphicsContext graphicsContext) {
+        HashMap<Point, Integer> checkingMaxNeigbours = new HashMap<>();
         int j = 0;
         int state;
 
         WritableImage snap = graphicsContext.getCanvas()
                 .snapshot(null, null);
+        if(nucleation.getStateAbsorbingBC(x,y) == 0) {
 
-        for(int i = 0; i < neighbourCells.length; i++){
-            int iTemp = x + neighbourCells[i][j];
-            int jTemp = y + neighbourCells[i][j + 1];
+            for (int i = 0; i < neighbourCells.length; i++) {
+                int iTemp = x + neighbourCells[i][j];
+                int jTemp = y + neighbourCells[i][j + 1];
 
-            state = nucleation.getStateAbsorbingBC(iTemp, jTemp);
+                state = nucleation.getStateAbsorbingBC(iTemp, jTemp);
+                Point point = new Point(iTemp, jTemp);
+                checkingMaxNeigbours.put(point, state);
+            }
 
-            iTemp = (int) ((iTemp * 900/size) + (0.5 *(900/size)));
-            jTemp = (int) ((jTemp * 900/size) + (0.5 *(900/size)));
+            Point maxPoint = findTheMaxNeighbour(checkingMaxNeigbours);
+            if (checkingMaxNeigbours.get(maxPoint) != 0) {
+                newNucleation.makeCellAlive(x, y, checkingMaxNeigbours.get(maxPoint));
 
-            if(state != 0){
-                newNucleation.makeCellAlive(x, y, state);
-                int color = snap.getPixelReader().getArgb(iTemp, jTemp );
-                System.out.println(color);
+                int xpos = (int) ((maxPoint.getX() * 900 / size) + (0.1 * (900 / size)));
+                int ypos = (int) ((maxPoint.getY() * 900 / size) + (0.1 * (900 / size)));
+
+                int color = snap.getPixelReader().getArgb(xpos, ypos);
+
                 int red = (color >> 16) & 0xff;
                 int green = (color >> 8) & 0xff;
                 int blue = color & 0xff;
@@ -160,5 +124,18 @@ public class Neighbourhood {
                 graphicsContext.fillRect(x, y, 1, 1);
             }
         }
+    }
+
+    public Point findTheMaxNeighbour(HashMap<Point, Integer> checkingMaxNeigbours) {
+        Map.Entry<Point, Integer> maxEntry = null;
+
+        for (Map.Entry<Point, Integer> entry : checkingMaxNeigbours.entrySet())
+        {
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+            {
+                maxEntry = entry;
+            }
+        }
+        return maxEntry.getKey();
     }
 }

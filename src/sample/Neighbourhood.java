@@ -1,17 +1,11 @@
 package sample;
 
-import com.sun.prism.Graphics;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.CheckBox;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+
 
 public class Neighbourhood {
     int[][] neumannCells;
@@ -79,8 +73,8 @@ public class Neighbourhood {
                                       Nucleation nucleation,
                                       Nucleation newNucleation,
                                       GraphicsContext graphicsContext, int checkBoxSelected) {
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
                 checkAndFillCells(x, y, size, neighbourCells,
                   nucleation,newNucleation, graphicsContext, checkBoxSelected);
             }
@@ -95,10 +89,13 @@ public class Neighbourhood {
         HashMap<Point, Integer> checkingMaxNeigbours = new HashMap<>();
         int j = 0;
         int state = -1;
+      //  System.out.println("x: " + x + " y: " + y);
 
         WritableImage snap = graphicsContext.getCanvas()
                 .snapshot(null, null);
+
         if(nucleation.getStateAbsorbingBC(x,y) == 0 || nucleation.getStatePeriodicBC(x, y, size) == 0) {
+
 
             for (int i = 0; i < neighbourCells.length; i++) {
                 int iTemp = x + neighbourCells[i][j];
@@ -118,8 +115,19 @@ public class Neighbourhood {
             if (checkingMaxNeigbours.get(maxPoint) != 0) {
                 newNucleation.makeCellAlive(x, y, checkingMaxNeigbours.get(maxPoint));
 
-                int xpos = (int) ((maxPoint.getX() * 900 / size) + (0.5 * (900 / size)));
-                int ypos = (int) ((maxPoint.getY() * 900 / size) + (0.5 * (900 / size)));
+                int[] arr;
+                int xpos, ypos;
+           //     System.out.println(maxPoint.getX() + " " + maxPoint.getY());
+                    arr = nucleation.getCordinatesBCPeriodic(maxPoint.getX(),
+                            maxPoint.getY(), size);
+                    xpos = arr[0];
+                    ypos = arr[1];
+
+                System.out.println(xpos + " " + ypos);
+                xpos = (int) ((xpos * 900 / size) + (0.5 * (900 / size)));
+                ypos = (int) ((ypos * 900 / size) + (0.5 * (900 / size)));
+
+            //    System.out.println(xpos + " " + ypos);
 
                 int color = snap.getPixelReader().getArgb(xpos, ypos);
 
@@ -129,6 +137,8 @@ public class Neighbourhood {
 
                 graphicsContext.setFill(Color.rgb(red, green, blue));
                 graphicsContext.fillRect(x, y, 1, 1);
+
+            //    System.out.println("woooocsbhjwdijckaschijkawscbjkjasldca");
             }
         }
     }

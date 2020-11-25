@@ -7,17 +7,15 @@ import javafx.scene.control.Alert;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.spi.CalendarNameProvider;
 
 public class Nucleation {
     int width;
     int height;
     int[][] grid;
+    int cellsCounter = 0;
 
     public Nucleation(int width, int height) {
         this.width = width;
@@ -26,6 +24,7 @@ public class Nucleation {
     }
     public void makeCellAlive(int x, int y, int stage){
         this.grid[x][y] = stage;
+        cellsCounter++;
     }
 
     public void setStage(int x, int y){
@@ -42,32 +41,73 @@ public class Nucleation {
         return this.grid[x][y];
     }
 
-    public int getStatePeriodicBC(int x, int y, int valueOfCells){
+    public int getStatePeriodicBC(int x, int y, int size){
         if (x < 0 && y < 0) {
-            return this.grid[valueOfCells - 1][valueOfCells - 1];
+
+            return this.grid[size - 1][size - 1];
         }
-        if (x >= width && y < 0) {
-            return this.grid[0][valueOfCells - 1];
+        if (x >= size && y < 0) {
+            //System.out.println("drugie: ");
+            return this.grid[0][size - 1];
         }
-        if (x >= width && y >= height) {
+        if (x >= size && y >= size) {
+           // System.out.println("trzecie: ");
             return this.grid[0][0];
         }
-        if (x < 0 && y >= height) {
-            return this.grid[valueOfCells - 1][0];
+        if (x < 0 && y >= size) {
+          ///  System.out.println("czwarte: ");
+            return this.grid[size - 1][0];
         }
-        if (x >= width && (y >= 0 && y <=height-1)) {
+        if (x >= size && y <=size-1) {
+          //  System.out.println("piate: ");
             return this.grid[0][y];
         }
-        if (x < 0 && (y >= 0 && y <= height-1)) {
-            return this.grid[valueOfCells - 1][y];
+        if (x < 0 && y <= size-1) {
+          //  System.out.println("szósye: ");
+            return this.grid[size - 1][y];
         }
-        if (y >= height && (x >= 0 && x <= width-1)) {
+        if (y >= size && x <= size-1) {
+          //  System.out.println("siódme: ");
             return this.grid[x][0];
         }
-        if (y < 0  && (x >= 0 && x <= width-1)) {
-            return this.grid[x][valueOfCells - 1];
+        if (y < 0  && x <= size-1) {
+          //  System.out.println("ósme: ");
+            return this.grid[x][size - 1];
         }
+     //   System.out.println("ostatnie: ");
         return this.grid[x][y];
+    }
+
+    public int[] getCordinatesBCPeriodic(int x, int y, int size) {
+        if (x < 0 && y < 0) {
+
+            return new int[]{size - 1, size - 1};
+        }
+        if (x >= size && y < 0) {
+            return new int[]{0, size - 1};
+        }
+        if (x >= size && y >= size) {
+            return new int[]{0, 0};
+        }
+        if (x < 0 && y >= size) {
+            return new int[]{size - 1, 0};
+        }
+        if (x >= size && y <= size-1) {
+
+            return new int[]{0, y};
+        }
+        if (x < 0 && y <= size-1) {
+            return new int[]{size - 1, y};
+        }
+        if (y >= size && x <= size-1) {
+            return new int[]{x, 0};
+        }
+        if (y < 0  &&  x <= size-1) {
+
+            return new int[]{x, size - 1};
+        }
+       // System.out.println(x + " " + y);
+        return new int[]{x,y};
     }
 
     public void homogeousNucleation(int size, int aliveCellsInColumn,

@@ -6,11 +6,10 @@ import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
-
-
 import java.util.Random;
 
 public class View extends GridPane {
@@ -30,19 +29,16 @@ public class View extends GridPane {
     Label label5;
     Label label6;
     Label label7;
-
-
     TextField textFieldNumberCells;
     TextField textFieldNumberInRow;
     TextField textFieldNumberInColumn;
     TextField textFieldRandomNumber;
     TextField textFieldRadius;
     TextField textFieldRadNumber;
-
     CheckBox checkBoxPeriodic;
-
     Canvas canvas;
     GraphicsContext graphicsContext;
+    WritableImage snap;
 
     int size = 1000;
     int aliveCellsInRow, aliveCellsInColumn, aliveRandomCells, radius, aliveRadiusCells;
@@ -56,7 +52,6 @@ public class View extends GridPane {
     Random random = new Random();
     Neighbourhood neighbourhood = new Neighbourhood();
 
-
     public View() {
         this.setHgap(5);
         this.setVgap(5);
@@ -64,6 +59,7 @@ public class View extends GridPane {
 
         canvas = new Canvas(900, 900);
         graphicsContext = this.canvas.getGraphicsContext2D();
+
 //-----------------------------------------------------------------------------
         this.label1 = new Label("Number of cells to create the grid:");
         label1.setAlignment(Pos.CENTER);
@@ -87,7 +83,6 @@ public class View extends GridPane {
         this.newNucleationGrid = new Nucleation(size, size);
 
 //---------------------------------------------------------------------
-
         this.label2 = new Label("Number of alive cells in row:");
 
         this.textFieldNumberInRow = new TextField("");
@@ -104,7 +99,6 @@ public class View extends GridPane {
                 alert.showAndWait();
             }
         });
-
 
         this.label3 = new Label("Number of alive cells in column:");
 
@@ -203,11 +197,8 @@ public class View extends GridPane {
                     size, stage, random);
         });
 //--------------------------------------------------------------------------------
-
         this.checkBoxPeriodic = new CheckBox("periodic");
 //---------------------------------------------------------------------------------
-
-
 
         AnimationTimer animationTimer = new AnimationTimer() {
             @Override
@@ -225,19 +216,143 @@ public class View extends GridPane {
                     stop();
                 });
 
-                
+
+            }
+        };
+
+        AnimationTimer animationTimer1 = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                simulationOneStep(neighbourhood.mooreCells);
+                try{
+                    Thread.sleep(5);
+                }
+                catch(InterruptedException interruptedException){
+                    interruptedException.printStackTrace();
+                }
+
+                animationStop.setOnAction(actionEvent -> {
+                    stop();
+                });
+
+
+            }
+        };
+        AnimationTimer animationTimer2 = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                simulationOneStep(neighbourhood.pentLeftCells);
+
+                try{
+                    Thread.sleep(5);
+                }
+                catch(InterruptedException interruptedException){
+                    interruptedException.printStackTrace();
+                }
+
+                animationStop.setOnAction(actionEvent -> {
+                    stop();
+                });
+
+
+            }
+        };
+
+        AnimationTimer animationTimer3 = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                simulationOneStep(neighbourhood.pentRightCells);
+
+                try{
+                    Thread.sleep(5);
+                }
+                catch(InterruptedException interruptedException){
+                    interruptedException.printStackTrace();
+                }
+
+                animationStop.setOnAction(actionEvent -> {
+                    stop();
+                });
+            }
+        };
+
+        AnimationTimer animationTimer4 = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                simulationOneStep(neighbourhood.pentBottomCells);
+
+                try{
+                    Thread.sleep(5);
+                }
+                catch(InterruptedException interruptedException){
+                    interruptedException.printStackTrace();
+                }
+
+                animationStop.setOnAction(actionEvent -> {
+                    stop();
+                });
+            }
+        };
+        AnimationTimer animationTimer5 = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                simulationOneStep(neighbourhood.pentTopCells);
+
+                try{
+                    Thread.sleep(5);
+                }
+                catch(InterruptedException interruptedException){
+                    interruptedException.printStackTrace();
+                }
+
+                animationStop.setOnAction(actionEvent -> {
+                    stop();
+                });
+            }
+        };
+        AnimationTimer animationTimer6 = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                simulationOneStep(neighbourhood.hexLeftCells);
+
+                try{
+                    Thread.sleep(5);
+                }
+                catch(InterruptedException interruptedException){
+                    interruptedException.printStackTrace();
+                }
+
+                animationStop.setOnAction(actionEvent -> {
+                    stop();
+                });
+            }
+        };
+        AnimationTimer animationTimer7 = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                simulationOneStep(neighbourhood.hexRightCells);
+
+                try{
+                    Thread.sleep(5);
+                }
+                catch(InterruptedException interruptedException){
+                    interruptedException.printStackTrace();
+                }
+
+                animationStop.setOnAction(actionEvent -> {
+                    stop();
+                });
             }
         };
 
         this.buttonNeumann = new Button("Von Neumann");
         this.buttonNeumann.setOnAction(actionEvent -> {
             animationTimer.start();
-            //simulationOneStep(neighbourhood.neumannCells);
         });
 
         this.buttonMoore = new Button("Moore");
         this.buttonMoore.setOnAction(actionEvent -> {
-            simulationOneStep(neighbourhood.mooreCells);
+            animationTimer1.start();
         });
 
         this.buttonPer = new Button("Pentagonal");
@@ -245,18 +360,18 @@ public class View extends GridPane {
             int pent = random.nextInt(4);
             switch(pent){
                 case 1:
-                    simulationOneStep(neighbourhood.pentLeftCells);
+                    animationTimer2.start();
                     break;
                 case 2:
-                    simulationOneStep(neighbourhood.pentRightCells);
+                    animationTimer3.start();
                     break;
 
                 case 3:
-                    simulationOneStep(neighbourhood.pentBottomCells);
+                    animationTimer4.start();
                     break;
 
                 case 4:
-                    simulationOneStep(neighbourhood.pentTopCells);
+                    animationTimer5.start();
                     break;
 
                 default:
@@ -269,10 +384,10 @@ public class View extends GridPane {
             int pent = random.nextInt(2);
             switch(pent) {
                 case 1:
-                    simulationOneStep(neighbourhood.hexLeftCells);
+                    animationTimer6.start();
                     break;
                 case 2:
-                    simulationOneStep(neighbourhood.hexRightCells);
+                    animationTimer7.start();
                     break;
                 default:
                     break;
@@ -283,8 +398,6 @@ public class View extends GridPane {
         this.label7 = new Label("");
 
         this.animationStop = new Button("Animation stop");
-      
-      
 
 //------------------------------------------------------------------------------
         this.add(canvas, 1, 2, 1, 16);
@@ -330,12 +443,17 @@ public class View extends GridPane {
         }
     }
 
+
     public void simulationOneStep(int[][] cells){
-         resetNewGrid(newNucleationGrid);
-         neighbourhood.generationDevelopment(size, cells,
-                 nucleation, newNucleationGrid, graphicsContext,
-                 isCheckBoxPeriodicSelected(checkBoxPeriodic));
-         newNucleationReset(nucleation, newNucleationGrid);
+        snap = graphicsContext.getCanvas()
+                .snapshot(null, null);
+
+        resetNewGrid(newNucleationGrid);
+        neighbourhood.generationDevelopment(size, cells,
+             nucleation, newNucleationGrid, graphicsContext,
+             isCheckBoxPeriodicSelected(checkBoxPeriodic), snap);
+
+        newNucleationReset(nucleation, newNucleationGrid);
     }
 
     public void newNucleationReset(Nucleation nucleation,
@@ -371,12 +489,7 @@ public class View extends GridPane {
         for (int x = 0; x < this.nucleation.width; x++) {
             for (int y = 0; y < this.nucleation.height; y++) {
 
-
-                if(checkBoxPeriodic.isSelected()) {
-                    state = nucleation.getStatePeriodicBC(x, y, size);
-                } else {
-                    state = nucleation.getStateAbsorbingBC(x, y);
-                }
+                state = nucleation.getStateAbsorbingBC(x, y);
 
                 if(state > 0) {
                     graphicsContext.setFill(Color.rgb(a[0], b[0], c[0]));

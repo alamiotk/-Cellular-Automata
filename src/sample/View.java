@@ -22,6 +22,8 @@ public class View extends GridPane {
     Button buttonPer;
     Button buttonHex;
     Button animationStop;
+    Button buttonMonteCarlo;
+    Button stopMonteCarlo;
     Label label1;
     Label label2;
     Label label3;
@@ -50,7 +52,7 @@ public class View extends GridPane {
     Nucleation nucleation;
     Nucleation newNucleationGrid;
     Random random = new Random();
-    Neighbourhood neighbourhood = new Neighbourhood();
+    Neighbourhood neighbourhood  = new Neighbourhood();
 
     public View() {
         this.setHgap(5);
@@ -200,13 +202,15 @@ public class View extends GridPane {
         this.checkBoxPeriodic = new CheckBox("periodic");
 //---------------------------------------------------------------------------------
 
+
+
         AnimationTimer animationTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
                  simulationOneStep(neighbourhood.neumannCells);
 
                  try{
-                     Thread.sleep(5);
+                     Thread.sleep(1);
                  }
                  catch(InterruptedException interruptedException){
                      interruptedException.printStackTrace();
@@ -345,6 +349,24 @@ public class View extends GridPane {
             }
         };
 
+        AnimationTimer animationTimer9 = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                simulationMonteCarlo();
+
+                try{
+                    Thread.sleep(5);
+                }
+                catch(InterruptedException interruptedException){
+                    interruptedException.printStackTrace();
+                }
+
+                stopMonteCarlo.setOnAction(actionEvent -> {
+                    stop();
+                });
+            }
+        };
+
         this.buttonNeumann = new Button("Von Neumann");
         this.buttonNeumann.setOnAction(actionEvent -> {
             animationTimer.start();
@@ -399,8 +421,18 @@ public class View extends GridPane {
 
         this.animationStop = new Button("Animation stop");
 
+        this.buttonMonteCarlo = new Button("Monte Carlo");
+        this.buttonMonteCarlo.setOnAction(actionEvent -> {
+            animationTimer9.start();
+        });
+
+        this.stopMonteCarlo = new Button("Stop Monte Carlo");
+
+
+
+
 //------------------------------------------------------------------------------
-        this.add(canvas, 1, 2, 1, 16);
+        this.add(canvas, 1, 2, 1, 18);
         this.add(label1, 3, 1,3,1);
         this.add(textFieldNumberCells, 4, 2, 1, 1);
 
@@ -433,6 +465,9 @@ public class View extends GridPane {
         this.add(buttonHex, 5, 15, 1, 1);
 
         this.add(animationStop, 4, 16, 1, 1);
+
+        this.add(buttonMonteCarlo, 4, 17, 1, 1);
+        this.add(stopMonteCarlo, 4, 18, 1, 1);
     }
 
     public int isCheckBoxPeriodicSelected(CheckBox checkBoxPeriodic) {
@@ -449,9 +484,24 @@ public class View extends GridPane {
                 .snapshot(null, null);
 
         resetNewGrid(newNucleationGrid);
-        neighbourhood.generationDevelopment(size, cells,
-             nucleation, newNucleationGrid, graphicsContext,
-             isCheckBoxPeriodicSelected(checkBoxPeriodic), snap);
+
+        neighbourhood.growth(cells,
+             nucleation, newNucleationGrid,
+             isCheckBoxPeriodicSelected(checkBoxPeriodic), snap, size, graphicsContext);
+
+        newNucleationReset(nucleation, newNucleationGrid);
+    }
+
+    public void simulationMonteCarlo(){
+        System.out.println("LICZBA ITERACJI");
+        snap = graphicsContext.getCanvas()
+                .snapshot(null, null);
+
+        resetNewGrid(newNucleationGrid);
+
+        neighbourhood.crossingTheGridMonteCarlo(nucleation, newNucleationGrid,
+                isCheckBoxPeriodicSelected(checkBoxPeriodic),
+                size, graphicsContext, snap);
 
         newNucleationReset(nucleation, newNucleationGrid);
     }

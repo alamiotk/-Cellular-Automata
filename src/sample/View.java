@@ -423,6 +423,7 @@ public class View extends GridPane {
 
         this.buttonMonteCarlo = new Button("Monte Carlo");
         this.buttonMonteCarlo.setOnAction(actionEvent -> {
+            //simulationMonteCarlo();
             animationTimer9.start();
         });
 
@@ -493,17 +494,16 @@ public class View extends GridPane {
     }
 
     public void simulationMonteCarlo(){
-        System.out.println("LICZBA ITERACJI");
         snap = graphicsContext.getCanvas()
                 .snapshot(null, null);
 
-        resetNewGrid(newNucleationGrid);
+        resetNewGridMonteCarlo(newNucleationGrid, nucleation);
 
         neighbourhood.crossingTheGridMonteCarlo(nucleation, newNucleationGrid,
                 isCheckBoxPeriodicSelected(checkBoxPeriodic),
                 size, graphicsContext, snap);
 
-        newNucleationReset(nucleation, newNucleationGrid);
+        newNucleationResMonteCarlo(nucleation, newNucleationGrid);
     }
 
     public void newNucleationReset(Nucleation nucleation,
@@ -517,10 +517,40 @@ public class View extends GridPane {
         }
     }
 
+    public void newNucleationResMonteCarlo(Nucleation nucleation,
+                                   Nucleation newNucleationGrid) {
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++) {
+                if(newNucleationGrid.grid[i][j] != nucleation.grid[i][j]) {
+                    nucleation.grid[i][j] = newNucleationGrid.grid[i][j];
+                }
+            }
+        }
+    }
+
+    public void print(Nucleation nucleation,
+                                   Nucleation newNucleationGrid) {
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++) { {
+                    System.out.println(nucleation.grid[i][j]);
+                }
+            }
+        }
+    }
+
+
     public void resetNewGrid(Nucleation newNucleationGrid) {
         for(int i = 0; i < size; i++){
             for(int j = 0; j < size; j++){
                 newNucleationGrid.setStage(i,j);
+            }
+        }
+    }
+    public void resetNewGridMonteCarlo(Nucleation newNucleationGrid,
+                                       Nucleation nucleation) {
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++){
+                newNucleationGrid.grid[i][j] = nucleation.grid[i][j];
             }
         }
     }

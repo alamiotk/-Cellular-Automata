@@ -1,6 +1,5 @@
 package sample;
 
-import com.sun.prism.Graphics;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
@@ -133,7 +132,6 @@ public class Neighbourhood {
                                   HashMap<Point, Integer> checkingMaxNeigbours) {
         int j = 0;
         int state = -1;
-        int deltaKroneckera = -1;
         int stateOfMyCell = nucleation.getStateAbsorbingBC(x, y);
         int res = 0;
         energy = 0;
@@ -144,6 +142,8 @@ public class Neighbourhood {
             int jTemp = y + neighbourCells[i][j + 1];
 
             state = checkStateBC(iTemp, jTemp, nucleation, checkBoxSelected, size);
+
+
 
             switch(functionChoose){
                 case 1:
@@ -158,12 +158,12 @@ public class Neighbourhood {
                     break;
 
                 case 3:
-                    energy += monteCarloCalculateEnergy(energy, state, stateOfMyCell, deltaKroneckera);
+                    energy = monteCarloCalculateEnergy(state, stateOfMyCell);
                     res += energy;
                     break;
 
                 case 4:
-                    monteCarloChangeState(iTemp, jTemp, state, stateOfMyCell, cellsNeigbour);
+                    monteCarloCellNeighbours(iTemp, jTemp, state, stateOfMyCell);
                     break;
 
                 default:
@@ -202,7 +202,7 @@ public class Neighbourhood {
     }
 
     public int monteCarloCheckTheEdge(int state, int stateOfMyCell, int x, int y){
-        if(state != stateOfMyCell){
+        if(state != stateOfMyCell ){
             Point point = new Point(x,y,stateOfMyCell);
             cellsBoundary.add(point);
             return 1;
@@ -210,22 +210,28 @@ public class Neighbourhood {
         return 0;
     }
 
-    public int monteCarloCalculateEnergy(int energy, int state, int stateOfMyCell, int deltaKroneckera) {
+    public int monteCarloCalculateEnergy(int state, int stateOfMyCell) {
+        int deltaKroneckera;
+        int energy = 0;
+
         if(stateOfMyCell == state){
             deltaKroneckera = 1;
         }
         else {
             deltaKroneckera = 0;
         }
-        energy += deltaKroneckera;
+        energy = 1 - deltaKroneckera;
         return energy;
     }
 
-    public void monteCarloChangeState(int x, int y, int state, int stateOfMyCell, List<Point> cellsNeigbour) {
-        if(state != stateOfMyCell){
+    public int monteCarloCellNeighbours(int x, int y, int state, int stateOfMyCell) {
+        if(state != stateOfMyCell || state == stateOfMyCell){
             Point pointNeighbour = new Point(x, y, state);
             cellsNeigbour.add(pointNeighbour);
+            return 1;
+
         }
+        return 0;
 
     }
 
@@ -241,7 +247,7 @@ public class Neighbourhood {
         Random random = new Random();
 
         cellsBoundary.clear();
-        cellsNeigbour.clear();
+
 
 
         for (int x = 0; x < size; x++) {
@@ -251,51 +257,52 @@ public class Neighbourhood {
             }
         }
 
-        int energyCalc = 0;
-        int newEnergy = 0;
-        Point randomPointToChangeState;
+        int energyBefore = 0;
+        int energyAfter = 0;
+        Point randomMyCell;
         double probability = 0;
 
         while(cellsBoundary.size() > 0) {
-            energyCalc = 0;
-            newEnergy = 0;
+            cellsNeigbour.clear();
+            energyBefore = 0;
+            energyAfter = 0;
 
-            System.out.println(cellsBoundary.size());
 
-            randomPointToChangeState = cellsBoundary.get(random.nextInt(cellsBoundary.size()));
+            randomMyCell = cellsBoundary.get(random.nextInt(cellsBoundary.size()));
 
-            int tempState = randomPointToChangeState.getState();
+            int tempState = randomMyCell.getState();
 
-            energyCalc = checkNeigboursLoop(randomPointToChangeState.getX(), randomPointToChangeState.getY(),
+            energyBefore = checkNeigboursLoop(randomMyCell.getX(), randomMyCell.getY(),
                     mooreCells, nucleation, checkBoxSelected, 3, size, tmp);
 
-             checkNeigboursLoop(randomPointToChangeState.getX(), randomPointToChangeState.getY(),
+            checkNeigboursLoop(randomMyCell.getX(), randomMyCell.getY(),
                     mooreCells, nucleation, checkBoxSelected, 4, size, tmp);
 
             Point pointNeighbour;
             pointNeighbour = cellsNeigbour.get(random.nextInt(cellsNeigbour.size()));
 
-            randomPointToChangeState.setState(pointNeighbour.getState());
+            nucleation.makeCellAlive(randomMyCell.getX(), randomMyCell.getY(),
+                    pointNeighbour.getState());
 
 
-            newEnergy = checkNeigboursLoop(randomPointToChangeState.getX(), randomPointToChangeState.getY(),
+            energyAfter = checkNeigboursLoop(randomMyCell.getX(), randomMyCell.getY(),
                     mooreCells, nucleation, checkBoxSelected, 3, size, tmp);
 
-
-            int deltaEnergy = newEnergy - energyCalc;
+            int deltaEnergy = energyAfter - energyBefore;
 
             if(deltaEnergy <= 0){
                 probability = 1;
+
             }
             else {
-                probability = Math.exp(-deltaEnergy/(-0.6));
+                probability = Math.exp(-(deltaEnergy/(-0.6)));
             }
 
 
 
             if(probability == 1) {
-                newNucleation.makeCellAlive(randomPointToChangeState.getX(), randomPointToChangeState.getY(),
-                        randomPointToChangeState.getState());
+                newNucleation.makeCellAlive(randomMyCell.getX(), randomMyCell.getY(),
+                        pointNeighbour.getState());
 
                 int[] arr;
                 int xpos, ypos;
@@ -313,15 +320,17 @@ public class Neighbourhood {
                 int blue = color & 0xff;
 
                 graphicsContext.setFill(Color.rgb(red, green, blue));
-                graphicsContext.fillRect(randomPointToChangeState.getX(),
-                        randomPointToChangeState.getY(), 1, 1);
-                randomPointToChangeState.setState(tempState);
+                graphicsContext.fillRect(randomMyCell.getX(),
+                        randomMyCell.getY(), 1, 1);
 
-                cellsBoundary.remove(randomPointToChangeState);
+                nucleation.makeCellAlive(randomMyCell.getX(), randomMyCell.getY(),
+                        tempState);
+                cellsBoundary.remove(randomMyCell);
             }
             else {
-                System.out.println("4");
-                randomPointToChangeState.setState(tempState);
+                nucleation.makeCellAlive(randomMyCell.getX(), randomMyCell.getY(),
+                        tempState);
+                cellsBoundary.remove(randomMyCell);
             }
 
         }

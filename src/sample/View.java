@@ -590,12 +590,6 @@ public class View extends GridPane {
 
         resetNewGridMonteCarlo(newNucleationGrid, nucleation);
 
-//        neighbourhood.crossingTheGridMonteCarlo(nucleation, newNucleationGrid,
-//                isCheckBoxPeriodicSelected(checkBoxPeriodic),
-//                size, graphicsContext, snap);
-
-   //     System.out.println("ITERACJA");
-
         drx.allocationOfDislocation(size, nucleation, newNucleationGrid,
                 isCheckBoxPeriodicSelected(checkBoxPeriodic), pointsOnTheEdges,
                 pointsInside, snap, graphicsContext);

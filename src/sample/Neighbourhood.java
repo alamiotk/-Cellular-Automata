@@ -76,13 +76,15 @@ public class Neighbourhood {
     public void growth(int[][] neighbourCells,
                        Nucleation nucleation,
                        Nucleation newNucleation,
-                       int checkBoxSelected, WritableImage snap, int size, GraphicsContext graphicsContext) {
+                       int checkBoxSelected, WritableImage snap, int size,
+                       GraphicsContext graphicsContext) {
 
 
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 checkAndFillCellsGrowth(x, y, neighbourCells,
-                                nucleation,newNucleation, checkBoxSelected, snap, size, graphicsContext);
+                                nucleation,newNucleation, checkBoxSelected,
+                        snap, size, graphicsContext);
 
             }
         }
@@ -91,15 +93,16 @@ public class Neighbourhood {
     public void checkAndFillCellsGrowth(int x, int y, int[][] neighbourCells,
                                         Nucleation nucleation,
                                         Nucleation newNucleation,
-                                        int checkBoxSelected, WritableImage snap, int size, GraphicsContext graphicsContext) {
+                                        int checkBoxSelected, WritableImage snap,
+                                        int size, GraphicsContext graphicsContext) {
         int j = 0;
         int state = -1;
 
         HashMap<Point, Integer> checkingMaxNeigbours = new HashMap<>();
         if(nucleation.getStateAbsorbingBC(x,y) == 0
                 || nucleation.getStatePeriodicBC(x, y, size) == 0) {
-            checkNeigboursLoop(x, y, neighbourCells, nucleation, checkBoxSelected, 1, size,
-                    checkingMaxNeigbours);
+            checkNeigboursLoop(x, y, neighbourCells, nucleation, checkBoxSelected,
+                                        1, size, checkingMaxNeigbours);
 
             Point maxPoint = findTheMaxNeighbour(checkingMaxNeigbours);
             if (checkingMaxNeigbours.get(maxPoint) != 0) {
@@ -185,7 +188,9 @@ public class Neighbourhood {
         return state;
     }
 
-    public void addPointToMaxList(int x, int y, int state, HashMap<Point, Integer> checkingMaxNeigbours) {
+
+    public void addPointToMaxList(int x, int y, int state,
+                                  HashMap<Point, Integer> checkingMaxNeigbours) {
         Point point = new Point(x, y);
         checkingMaxNeigbours.put(point, state);
     }

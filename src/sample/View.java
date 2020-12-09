@@ -10,6 +10,10 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class View extends GridPane {
@@ -24,6 +28,9 @@ public class View extends GridPane {
     Button animationStop;
     Button buttonMonteCarlo;
     Button stopMonteCarlo;
+    Button buttonDrx;
+    Button stopRDX;
+
     Label label1;
     Label label2;
     Label label3;
@@ -47,12 +54,17 @@ public class View extends GridPane {
     final int[] a = {100};
     final int[] b = { 60 };
     final int[] c = { 150 };
-
+    int numberOnTheEdge = 0;
+    int numberInside = 0;
     private Affine affine;
     Nucleation nucleation;
     Nucleation newNucleationGrid;
     Random random = new Random();
     Neighbourhood neighbourhood  = new Neighbourhood();
+    List<Point> pointsOnTheEdges = new ArrayList<>();
+    List<Point> pointsInside = new ArrayList<>();
+    DRX drx = new DRX();
+
 
     public View() {
         this.setHgap(5);
@@ -367,6 +379,24 @@ public class View extends GridPane {
             }
         };
 
+        AnimationTimer animationTimer10 = new AnimationTimer() {
+            @Override
+            public void handle(long l) {
+                simulationDRX();
+
+                try{
+                    Thread.sleep(5);
+                }
+                catch(InterruptedException interruptedException){
+                    interruptedException.printStackTrace();
+                }
+
+                stopRDX.setOnAction(actionEvent -> {
+                    stop();
+                });
+            }
+        };
+
         this.buttonNeumann = new Button("Von Neumann");
         this.buttonNeumann.setOnAction(actionEvent -> {
             animationTimer.start();
@@ -428,12 +458,28 @@ public class View extends GridPane {
         });
 
         this.stopMonteCarlo = new Button("Stop Monte Carlo");
+        this.stopMonteCarlo.setOnAction(actionEvent -> {
+
+        });
+
+
+
+        this.buttonDrx = new Button("DRX");
+        this.buttonDrx.setOnAction(actionEvent -> {
+            makeTwoListEdge();
+            animationTimer10.start();
+            //simulationDRX();
+
+        });
+
+        this.stopRDX = new Button("Stop DRX");
+
 
 
 
 
 //------------------------------------------------------------------------------
-        this.add(canvas, 1, 2, 1, 18);
+        this.add(canvas, 1, 2, 1, 20);
         this.add(label1, 3, 1,3,1);
         this.add(textFieldNumberCells, 4, 2, 1, 1);
 
@@ -469,7 +515,39 @@ public class View extends GridPane {
 
         this.add(buttonMonteCarlo, 4, 17, 1, 1);
         this.add(stopMonteCarlo, 4, 18, 1, 1);
+        this.add(buttonDrx, 4, 19,1,1);
+        this.add(stopRDX, 4, 20,1,1);
     }
+
+    public void makeTwoListEdge(){
+        HashMap<Point, Integer> checkingMaxNeigbours = new HashMap<>();
+
+
+
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                int res = neighbourhood.checkNeigboursLoop(x, y, neighbourhood.neumannCells,
+                        nucleation, isCheckBoxPeriodicSelected(checkBoxPeriodic),
+                        2, size, checkingMaxNeigbours);
+
+                int stateOfMyCell = nucleation.getStateAbsorbingBC(x, y);
+
+                if(res == 1) {
+                    Point pointEdge = new Point(x, y, stateOfMyCell, 0.0, 0);
+
+                    pointsOnTheEdges.add(pointEdge);
+                }
+                else{
+                    Point pointInside = new Point(x, y, stateOfMyCell, 0.0, 0);
+                    pointsInside.add(pointInside);
+                }
+            }
+        }
+
+        drx.listOfListOfPoints.add(pointsOnTheEdges);
+        drx.listOfListOfPoints.add(pointsInside);
+    }
+
 
     public int isCheckBoxPeriodicSelected(CheckBox checkBoxPeriodic) {
         if(checkBoxPeriodic.isSelected()){
@@ -502,6 +580,26 @@ public class View extends GridPane {
         neighbourhood.crossingTheGridMonteCarlo(nucleation, newNucleationGrid,
                 isCheckBoxPeriodicSelected(checkBoxPeriodic),
                 size, graphicsContext, snap);
+
+        newNucleationResMonteCarlo(nucleation, newNucleationGrid);
+    }
+
+    public void simulationDRX(){
+        snap = graphicsContext.getCanvas()
+                .snapshot(null, null);
+
+        resetNewGridMonteCarlo(newNucleationGrid, nucleation);
+
+//        neighbourhood.crossingTheGridMonteCarlo(nucleation, newNucleationGrid,
+//                isCheckBoxPeriodicSelected(checkBoxPeriodic),
+//                size, graphicsContext, snap);
+
+   //     System.out.println("ITERACJA");
+
+        drx.allocationOfDislocation(size, nucleation, newNucleationGrid,
+                isCheckBoxPeriodicSelected(checkBoxPeriodic), pointsOnTheEdges,
+                pointsInside, snap, graphicsContext);
+
 
         newNucleationResMonteCarlo(nucleation, newNucleationGrid);
     }
@@ -542,7 +640,7 @@ public class View extends GridPane {
     public void resetNewGrid(Nucleation newNucleationGrid) {
         for(int i = 0; i < size; i++){
             for(int j = 0; j < size; j++){
-                newNucleationGrid.setStage(i,j);
+                newNucleationGrid.setStageZero(i,j);
             }
         }
     }
@@ -601,7 +699,7 @@ public class View extends GridPane {
 
         for(int i = 0; i < size; i++){
             for(int j = 0; j < size; j++){
-                nucleation.setStage(i,j);
+                nucleation.setStageZero(i,j);
             }
         }
     }

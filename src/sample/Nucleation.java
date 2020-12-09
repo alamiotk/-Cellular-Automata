@@ -25,7 +25,8 @@ public class Nucleation {
         this.grid[x][y] = stage;
     }
 
-    public void setStage(int x, int y){
+
+    public void setStageZero(int x, int y){
         this.grid[x][y] = 0;
     }
 
